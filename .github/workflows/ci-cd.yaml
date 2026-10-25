@@ -1,8 +1,10 @@
-name: Voting App CI/CD
+name: Capstone 1: Final clean code ready for CI/CD
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build-and-deploy:
@@ -10,6 +12,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -25,5 +32,18 @@ jobs:
         with:
           context: ./vote
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/examplevotingapp_vote:${{ github.sha }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/example-voting-app-vote:latest
 
+      - name: Build and Push Result Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./result
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/example-voting-app-result:latest
+
+      - name: Build and Push Worker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./worker
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/example-voting-app-worker:latest
