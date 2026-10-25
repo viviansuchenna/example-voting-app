@@ -21,8 +21,14 @@ RUN dotnet restore -a $TARGETARCH
 COPY . .
 RUN dotnet publish -c release -o /app -a $TARGETARCH --self-contained false --no-restore
 
+
 # app image
 FROM mcr.microsoft.com/dotnet/runtime:7.0
 WORKDIR /app
+
+# Create a non-root user and grant permissions
+RUN useradd -m appuser && chown -R appuser:appuser /app
+USER appuser
+
 COPY --from=build /app .
 ENTRYPOINT ["dotnet", "Worker.dll"]

@@ -18,8 +18,13 @@ RUN npm ci && \
 
 COPY . .
 
+# Create and set permissions for a non-root user (or use the built-in node user)
+RUN chown -R node:node /usr/local/app
+USER node
+
 ENV PORT=80
 EXPOSE 80
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["node", "server.js"]
+
