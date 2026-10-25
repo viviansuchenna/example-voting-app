@@ -13,7 +13,24 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
+   - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies and test
+        run: |
+          cd vote
+          pip install -r requirements.txt || true
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+  - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to Docker Hub
@@ -27,18 +44,24 @@ jobs:
         with:
           context: ./vote
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/example-voting-app-vote:latest
+          tags: |
+           ${{ secrets.DOCKERHUB_USERNAME }}/example-voting-app-vote:${{ github.sha }}
+           ${{ secrets.DOCKERHUB_USERNAME }}/example-voting-app-vote:latest
 
       - name: Build and Push Result
         uses: docker/build-push-action@v5
         with:
           context: ./result
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/example-voting-app-result:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/example-voting-app-result:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/example-voting-app-result:latest
 
       - name: Build and Push Worker
         uses: docker/build-push-action@v5
         with:
           context: ./worker
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/example-voting-app-worker:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/example-voting-app-worker:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/example-voting-app-worker:latest
