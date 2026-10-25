@@ -1,4 +1,4 @@
-name: Capstone 1: Final clean code ready for CI/CD
+name: Capstone CI-CD
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -22,21 +22,21 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and Push Vote Image
+      - name: Build and Push Vote
         uses: docker/build-push-action@v5
         with:
           context: ./vote
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/example-voting-app-vote:latest
 
-      - name: Build and Push Result Image
+      - name: Build and Push Result
         uses: docker/build-push-action@v5
         with:
           context: ./result
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/example-voting-app-result:latest
 
-      - name: Build and Push Worker Image
+      - name: Build and Push Worker
         uses: docker/build-push-action@v5
         with:
           context: ./worker
